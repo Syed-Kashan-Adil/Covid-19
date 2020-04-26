@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-community/async-storage";
 
-const endpoint = "http://0a12eebe.ngrok.io"
+const endpoint = "https://covid-19-application.herokuapp.com"
 
 export const login = async (phoneNumber) => {
     try {
