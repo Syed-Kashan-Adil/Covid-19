@@ -18,6 +18,7 @@ app.post("/login", UserController.login)
 app.post("/verify_otp", UserController.verifyOTP)
 app.post("/registration", authenticate, UserController.registration)
 app.post("/covid_status", authenticate, UserController.updateCovidStatus)
+app.get("/get_user", authenticate, UserController.getUser)
 app.post("/add_temprature", authenticate, TempratureController.addTemprature)
 app.get("/get_temprature_record", authenticate, TempratureController.getTempratureRecord)
 

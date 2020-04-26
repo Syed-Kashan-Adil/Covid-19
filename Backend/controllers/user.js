@@ -46,7 +46,8 @@ const UserController = {
                         user,
                         firstTimeLogin: true,
                         token: JWTToken(user._id)
-                    }
+                    },
+                    status: true
                 })
             }
             return response.status(200).send({
@@ -55,7 +56,8 @@ const UserController = {
                     user: User,
                     firstTimeLogin: false,
                     token: JWTToken(User._id)
-                }
+                },
+                status: true
             })
 
         } catch (err) {
@@ -69,7 +71,7 @@ const UserController = {
         try {
             const { fullName, address, } = request.body
             const { value: { body: { userId } } } = request
-            const user = UserModel.findOne({ _id: userId });
+            const user = await UserModel.findOne({ _id: userId });
             if (!user)
                 return response.status(400).send({ message: "User not found", status: false })
             await UserModel.updateOne({ _id: userId }, { $set: { fullName, address } });
@@ -85,7 +87,7 @@ const UserController = {
         try {
             const { status } = request.body
             const { userId } = request.value.body
-            const user = UserModel.findOne({ _id: userId });
+            const user = await UserModel.findOne({ _id: userId });
             if (!user)
                 return response.status(400).send({ message: "User not found", status: false })
             await UserModel.updateOne({ _id: userId }, { $set: { status } })
@@ -97,6 +99,17 @@ const UserController = {
             })
         }
 
+    },
+    getUser: async (request, response) => {
+        try {
+            const { userId } = request.value.body
+            const user = UserModel.findOne({ _id: userId });
+            if (!user)
+                return response.status(400).send({ message: "User not found", status: false })
+            return response.status(200).send({ data: { user }, status: true })
+        } catch (err) {
+
+        }
     }
 
 }
