@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { Component } from "react";
+import { MenuProvider } from 'react-native-popup-menu';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AuthStack, UserStack, AdminStack } from "./navigation"
@@ -24,4 +25,6 @@ class App extends Component {
   }
 }
 
-export default App;
+export default () => <MenuProvider>
+  <App />
+</MenuProvider>;

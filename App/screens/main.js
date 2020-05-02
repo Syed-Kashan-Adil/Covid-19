@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { ToastAndroid, View, ActivityIndicator, TouchableOpacity, PermissionsAndroid } from "react-native";
 import AsyncStorage from "@react-native-community/async-storage";
-import Prompt from "react-native-input-prompt"
+import prompt from 'react-native-prompt-android';
 import Geolocation from 'react-native-geolocation-service';
 import QRCode from 'react-native-qrcode-svg';
 import { Header, Body, Right, Button as NativeButton, Icon, Title } from 'native-base'
-import { getUser, saveLocation } from "../apis"
+import { getUser, saveLocation, checkTemprature, addTemprature } from "../apis"
 import { Button } from "../components"
 
 
@@ -19,12 +19,13 @@ class Main extends Component {
     state = {
         user: {},
         loading: false,
-        visible: true
+        visible: false
     }
 
 
     async componentDidMount() {
         this.startTracking()
+        this.checkLastTemprature()
         this.setState({ loading: true })
         const response = await getUser();
         this.setState({ loading: false })
@@ -36,7 +37,7 @@ class Main extends Component {
     }
     handleLogout = async () => {
         await AsyncStorage.multiRemove(["token", "userId", "role"])
-        return this.props.navigation.navigate("AuthStack")
+        return this.props.navigation.navigate("AuthStack", { screen: "Login" })
     }
 
     startTracking = async () => {
@@ -53,6 +54,27 @@ class Main extends Component {
                 },
                 { enableHighAccuracy: true, distanceFilter: 1, interval: 5000 }
             );
+        }
+    }
+
+    checkLastTemprature = async () => {
+        const response = await checkTemprature();
+        if (response.status) {
+            const { getTemprature } = response.data;
+            if (getTemprature) {
+                prompt(
+                    'Temprature',
+                    'Enter Your Temprature In °F',
+                    [
+                        { text: 'OK', onPress: temp => addTemprature(temp) },
+                    ],
+                    {
+                        type: 'numeric',
+                        cancelable: false,
+                        placeholder: 'E.g 100 °F'
+                    }
+                )
+            }
         }
     }
 
@@ -101,22 +123,9 @@ class Main extends Component {
                     }
                 </View>
                 <View style={{ flex: 0.45, justifyContent: "flex-end" }}>
-                    <Button text="ADD YOUR TEMPRATURE" onPress={() => { }} />
+                    {/* <Button text="ADD YOUR TEMPRATURE" onPress={() => { }} /> */}
                 </View>
                 <View style={{ flex: 0.05 }} />
-                <Prompt
-                    visible={visible}
-                    title="Enter Your Temprature In °F"
-                    cancelButtonTextStyle={{ opacity: 0 }}
-                    placeholder="e.g 100"
-
-                    onSubmit={text =>
-                        this.setState({
-                            temprature: text,
-                            visible: !visible
-                        })
-                    }
-                />
             </View>
         )
     }

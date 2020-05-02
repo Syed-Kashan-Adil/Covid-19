@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
-import { TouchableOpacity, ActivityIndicator, View } from 'react-native';
+import { TouchableOpacity, ActivityIndicator, View, FlatList } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { Container, Header, Content, Card, CardItem, Thumbnail, Text, Button as NativeButton, Icon, Left, Body, Right, Title } from 'native-base';
-import { userDetail } from "../apis"
+import { Container, Header, Content, Card, CardItem, Thumbnail, Text, Button as NativeButton, Icon, Left, Body, Right, Title, List, ListItem } from 'native-base';
+import { userDetail, getTempratureRecord, updateCovidStatus } from "../apis"
+import {
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
 
 const QRcolors = {
     0: "green",
@@ -12,23 +18,30 @@ const QRcolors = {
 class UserDetail extends Component {
     state = {
         user: {},
-        loading: true
+        loading: true,
+        tempratureRecord: []
     }
     async  componentDidMount() {
 
-        // const { route: { params: { id: userId } } } = this.props
+        const { route: { params: { id: userId } } } = this.props
+        const [response, tempratureResponse] = await Promise.all([
+            userDetail(userId),
+            getTempratureRecord(userId)
+        ])
 
-        const response = await userDetail("5ea4b442c149580c8f92787c");
         if (response.status) {
             const { user } = response.data;
             this.setState({ user })
         }
-        this.setState({ loading: false })
-        console.log((response))
+        const { status, data } = tempratureResponse
+        if (status) {
+            this.setState({ tempratureRecord: data.tempratureRecord })
+        }
+        return this.setState({ loading: false })
     }
     render() {
 
-        const { user: { _id, fullName, joinDate, address, phoneNumber, status }, loading } = this.state;
+        const { user: { _id, fullName, joinDate, address, phoneNumber, status }, loading, tempratureRecord } = this.state;
         const { navigation } = this.props
         return (
             <Container >
@@ -54,7 +67,7 @@ class UserDetail extends Component {
                     </View> : (
                             <Content style={{ flex: 1, backgroundColor: "#404040ae" }}>
 
-                                <Card style={{ width: "90%", marginTop: 30, alignSelf: "center" }}>
+                                <Card style={{ width: "90%", marginTop: 30, alignSelf: "center", flex: 0.2 }}>
                                     <CardItem>
                                         <Left>
                                             <QRCode
@@ -72,9 +85,26 @@ class UserDetail extends Component {
 
                                         </Left>
                                         <Right style={{ marginBottom: 20 }}>
-                                            <NativeButton transparent textStyle={{ color: '#87838B' }}>
-                                                <Icon name="options" type="SimpleLineIcons" />
-                                            </NativeButton>
+                                            <Menu onSelect={status => {
+                                                const { user } = this.state;
+                                                this.setState({ user: { ...user, status } })
+                                                return updateCovidStatus(_id, status)
+
+                                            }}>
+                                                <MenuTrigger text='Change Covid Status' />
+                                                <MenuOptions>
+
+                                                    <MenuOption value={0}>
+                                                        <Text style={{ color: 'green' }}>Green</Text>
+                                                    </MenuOption>
+                                                    <MenuOption value={1}>
+                                                        <Text style={{ color: 'yellow' }}>Yellow</Text>
+                                                    </MenuOption>
+                                                    <MenuOption value={2}>
+                                                        <Text style={{ color: 'red' }}>Red</Text>
+                                                    </MenuOption>
+                                                </MenuOptions>
+                                            </Menu>
                                         </Right>
                                     </CardItem>
                                     <CardItem>
@@ -88,18 +118,29 @@ class UserDetail extends Component {
                                                 <Text style={{ fontSize: 16 }}>{phoneNumber}</Text>
                                             </NativeButton>
                                         </Left>
-                                        {/* <Body>
-
-                            </Body> */}
-
                                     </CardItem>
                                 </Card>
 
+                                <View style={{ flex: 0.6 }}>
+                                    <List>
+                                        <FlatList
+                                            data={tempratureRecord}
+                                            renderItem={({ item, index }) => (
+                                                <ListItem style={{ flexDirection: 'row', justifyContent: "space-between" }} key={`${index}`}>
+                                                    <Text style={{ color: "#fff" }}>{`Fever : ${item.temprature} °F`}</Text>
+                                                    <Text style={{ color: "#fff" }}>{`Date : ${new Date(item.created_at).toLocaleDateString()}`}</Text>
+                                                </ListItem>
+                                            )}
 
+                                        />
+
+
+
+                                    </List>
+                                </View>
                             </Content>
                         )
                 }
-
             </Container>
         );
     }

@@ -19,7 +19,6 @@ class Confirmation extends Component {
         const { code } = this.state;
         const { route: { params: { phoneNumber } }, navigation } = this.props
         const response = await verifyOtp(phoneNumber, Number(code));
-        this.setState({ loading: false })
         console.log(response.data)
         if (response.status) {
             const { data: { firstTimeLogin, token, user: { _id, userRole } } } = response;
@@ -27,8 +26,13 @@ class Confirmation extends Component {
             await AsyncStorage.setItem("role", userRole)
             await AsyncStorage.setItem("userId", JSON.stringify(_id))
             await AsyncStorage.setItem("token", token)
+            await AsyncStorage.setItem("registeration", JSON.stringify(firstTimeLogin))
+
+            this.setState({ loading: false })
+
             return navigation.navigate(firstTimeLogin ? "Registration" : userRole === "user" ? "UserStack" : "AdminStack")
         }
+        this.setState({ loading: false })
         return ToastAndroid.show(response.message, ToastAndroid.LONG)
 
 
@@ -43,7 +47,7 @@ class Confirmation extends Component {
                     <View style={{ flex: 0.1, justifyContent: "center", alignItems: "center" }}>
                         <Text style={{ fontSize: 24, fontWeight: "bold", color: "#E8FD78" }}>Let's Verify Your Phone Number</Text>
                     </View>
-                    <View style={{ flex: 0.1, alignItems: "center", justifyContent: "center" }}>
+                    <View style={{ flex: 0.1, alignItems: "center", justifyContent: "flex-end" }}>
                         <Text style={{ color: "#fff", fontSize: 22 }}>We have sent 4 digits code to </Text>
                         <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold", }}>{phoneNumber}</Text>
                     </View>

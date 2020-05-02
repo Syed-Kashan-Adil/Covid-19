@@ -1,17 +1,17 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, AsyncStorage } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import AsyncStorage from "@react-native-community/async-storage";
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { Header, Body, Right, Button as NativeButton, Icon, Title } from 'native-base'
 
 class QRScanner extends Component {
     onSuccess = e => {
         this.props.navigation.navigate("UserDetail", { id: e.data })
-
     }
 
     handleLogout = async () => {
         await AsyncStorage.multiRemove(["token", "userId", "role"])
-        return this.props.navigation.navigate("AuthStack")
+        return this.props.navigation.navigate("AuthStack", { screen: "Login" })
     }
 
     render() {
@@ -32,7 +32,7 @@ class QRScanner extends Component {
                 </Header>
                 <QRCodeScanner
                     onRead={this.onSuccess}
-                // reactivate={true}
+                    reactivate={true}
                 />
             </View>
         );
