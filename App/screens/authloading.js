@@ -9,7 +9,11 @@ class AuthLoading extends Component {
 
         const token = await AsyncStorage.getItem("token")
         console.log(token)
-        this.props.navigation.navigate(token ? "UserStack" : "AuthStack")
+        if (token) {
+            const role = await AsyncStorage.getItem("role");
+            return this.props.navigation.navigate(role === "admin" ? "AdminStack" : "UserStack")
+        }
+        return this.props.navigation.navigate("AuthStack")
     }
     render() {
         return (

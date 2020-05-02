@@ -42,7 +42,32 @@ export const registration = async (fullName, address) => {
 export const getUser = async () => {
     try {
         const token = await AsyncStorage.getItem("token")
-        const response = await fetch(`${endpoint}/registration`, { method: "GET", headers: { "Content-Type": "application/json", "Authorization": token } });
+        const response = await fetch(`${endpoint}/get_user`, { method: "GET", headers: { "Content-Type": "application/json", "Authorization": token } });
+        const responseJson = await response.json();
+        return responseJson
+    } catch (err) {
+        return err;
+    }
+}
+
+
+export const userDetail = async (userId) => {
+    try {
+        const token = await AsyncStorage.getItem("token")
+        const response = await fetch(`${endpoint}/user_detail?userId=${userId}`, { method: "GET", headers: { "Content-Type": "application/json", "Authorization": token } });
+        const responseJson = await response.json();
+        return responseJson
+    } catch (err) {
+        return err;
+    }
+}
+
+
+export const saveLocation = async (latitude, longitude, timestamp) => {
+    try {
+        const body = JSON.stringify({ latitude, longitude, timestamp })
+        const token = await AsyncStorage.getItem("token")
+        const response = await fetch(`${endpoint}/add_location`, { method: "POST", body, headers: { "Content-Type": "application/json", "Authorization": token } });
         const responseJson = await response.json();
         return responseJson
     } catch (err) {

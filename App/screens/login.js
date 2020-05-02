@@ -6,14 +6,13 @@ import { login } from "../apis"
 class Login extends Component {
     state = {
         loading: false,
-        phoneNumber: "+923493168819"
+        phoneNumber: ""
     }
     onStart = async () => {
         this.setState({ loading: true })
         Keyboard.dismiss()
         const { phoneNumber } = this.state
         const response = await login(phoneNumber)
-        console.log(response)
         this.setState({ loading: false })
         if (response.status)
             return this.props.navigation.navigate("Confirmation", { phoneNumber })
@@ -36,7 +35,7 @@ class Login extends Component {
                             style={{ width: "75%", marginHorizontal: "12.5%", borderColor: "#fff", borderWidth: 2, padding: 10, borderRadius: 5, color: "#fff", fontSize: 18, letterSpacing: 3 }}
                             placeholder="Enter Your Phone Number"
                             placeholderTextColor="#fff"
-                            keyboardType="number-pad"
+                            keyboardType="phone-pad"
                             onChangeText={this.onChange}
                             value={phoneNumber}
                         // autoFocus={true}

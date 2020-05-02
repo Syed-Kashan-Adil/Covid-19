@@ -22,10 +22,12 @@ class Confirmation extends Component {
         this.setState({ loading: false })
         console.log(response.data)
         if (response.status) {
-            const { data: { firstTimeLogin, token, user: { _id } } } = response;
+            const { data: { firstTimeLogin, token, user: { _id, userRole } } } = response;
+            console.log(userRole)
+            await AsyncStorage.setItem("role", userRole)
             await AsyncStorage.setItem("userId", JSON.stringify(_id))
             await AsyncStorage.setItem("token", token)
-            return navigation.navigate(firstTimeLogin ? "Registration" : "UserStack")
+            return navigation.navigate(firstTimeLogin ? "Registration" : userRole === "user" ? "UserStack" : "AdminStack")
         }
         return ToastAndroid.show(response.message, ToastAndroid.LONG)
 
